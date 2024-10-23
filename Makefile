@@ -6,7 +6,7 @@ debug: AtomOS.iso Makefile
 	@echo "target remote localhost:1234"
 	@gdb build/os.bin
 
-push: clean
+push:
 	@git commit -m "$(m)"
 	@git push -u main
 
