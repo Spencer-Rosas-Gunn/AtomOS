@@ -16,8 +16,11 @@ const mmap_entry = packed struct {
 };
 
 export fn kmain(magic: u32, raw_info: u32) callconv(.C) void {
-    // Ignore weird magic error
-    _ = magic;
+    if (magic != 0x1BADB002) {
+        tty.putsz("1BADBOOT!", 0x07, 0, 0);
+    } else {
+        tty.putsz("Multiboot Error!", 0x07, 0, 0);
+    }
 
     // Initialize memory map
     const boot_info: [*]u32 = @ptrFromInt(@as(usize, raw_info));
@@ -43,7 +46,7 @@ export fn kmain(magic: u32, raw_info: u32) callconv(.C) void {
     }
 
     // Print "Hello World!"
-    tty.putsz("Hello World!", 0x07, 0, 0);
+    tty.putsz("Hello World!", 0x07, 0, 1);
 
     hlt();
 }
