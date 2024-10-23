@@ -21,9 +21,9 @@ gdt_descriptor:
 
 bits 32
 _start:
-	mov esp, stack_top
-	push eax
-	push ebx
+	;; Read Multiboot Arguments
+	mov esi, eax
+	mov edi, ebx
 	
 	;; Load GDT
 	lgdt [gdt_descriptor]
@@ -52,11 +52,8 @@ _start:
 	
 bits 64
 long_mode_entry:
-	;; Read multiboot arguments
-	mov edi, [rsp]
-	mov esi, [rsp + 4]
-	add rsp, 8
-	mov rsp, rax
+	;; Initialize Stack
+	mov rsp, stack_top
 	
 	;; Enter the kernel
 	jmp kmain
