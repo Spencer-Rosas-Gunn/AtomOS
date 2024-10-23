@@ -19,8 +19,6 @@ gdt_descriptor:
 	dw gdt_end - gdt_start - 1 ; Limit (size of GDT - 1)
 	dq gdt_start                ; Base address of GDT
 
-
-
 bits 32
 _start:
 	mov esp, stack_top
