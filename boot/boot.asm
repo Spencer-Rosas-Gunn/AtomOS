@@ -52,18 +52,11 @@ _start:
 	
 bits 64
 long_mode_entry:
-	;; Reset RSP, just in case
-	mov rsp, stack_top
-	
 	;; Read multiboot arguments
-	pop rbx
-	
-	shl rbx, 32
-	shr rax, 32
-	mov rdi, rax
-
-	shr rbx, 32
-	mov rsi, rax
+	mov edi, [rsp]
+	mov esi, [rsp + 4]
+	add rsp, 8
+	mov rsp, rax
 	
 	;; Enter the kernel
 	jmp kmain
