@@ -16,7 +16,7 @@ clean:
 	@rm AtomOS.iso
 
 build/boot.o: boot/boot.asm
-	@nasm -f elf64 boot/boot.asm -o build/boot.o
+	@nasm -g -f elf64 boot/boot.asm -o build/boot.o
 
 build/kernel.o: src/ arch/
 	@zig build-obj -O ReleaseFast -target x86_64-freestanding -femit-bin=build/kernel.o src/main.zig

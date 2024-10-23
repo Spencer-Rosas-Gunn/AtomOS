@@ -19,6 +19,21 @@ gdt_descriptor:
 	dw gdt_end - gdt_start - 1 ; Limit (size of GDT - 1)
 	dq gdt_start                ; Base address of GDT
 
+table4:
+	dq table3
+	times 511 dq 0
+
+table3:
+	dq table2
+	times 511 dq 0
+
+table2:
+	dq table1
+	times 511 dq 0
+
+table1:
+	resb 4096
+	
 bits 32
 _start:
 	;; Read Multiboot Arguments
@@ -52,6 +67,26 @@ _start:
 	
 bits 64
 long_mode_entry:
+	;; Initialize Page Table
+	;; rbx = 0
+	mov rbx, 0
+start_loop:
+	;; *(table1 + rbx * 8) := rbx
+	mov rax, 8
+	mul rbx
+	mov rax, table1
+	add rbx, rax
+	mov [rax], rbx
+	;; rbx := rbx + 1
+	add rbx, 1
+	mov rbx, rax
+	;; if(rbx != 512) goto start_loop
+	cmp rbx, 512
+	jne start_loop
+
+	mov rax, table1
+	mov cr3, rax
+	
 	;; Initialize Stack
 	mov rsp, stack_top
 	
@@ -64,8 +99,6 @@ long_mode_entry:
 
 section .bss
 align 4096
-	gdt resb 64
-	
 stack_bottom:
         ;; 4KB stack
         resb 4096
