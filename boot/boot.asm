@@ -60,7 +60,13 @@ start_loop:
 	;; *(table1 + rbx * 8) := ebx
 	mov eax, ebx
 	shl eax, 3
+	mov ecx, eax
 	mov eax, table1
+	add eax, ecx
+	mov ecx, eax
+	mov eax, ebx
+	shl eax, 12
+	or eax, 0x60
 	mov [eax], ebx
 	;; ebx := ebx + 1
 	inc ebx
