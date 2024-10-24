@@ -19,6 +19,8 @@ gdt_descriptor:
 	dw gdt_end - gdt_start - 1 ; Limit (size of GDT - 1)
 	dq gdt_start                ; Base address of GDT
 
+section .table
+align 4096
 table4:
 	dq table3
 	times 511 dq 0
@@ -51,42 +53,47 @@ _start:
 	mov fs, ax
 	mov gs, ax
 
-	;; Enter long mode
-	cli
+	;; Initialize Page Table
+	;; rbx = 0
+	mov ebx, 0
+start_loop:
+	;; *(table1 + rbx * 8) := ebx
+	mov eax, ebx
+	shl eax, 3
+	mov eax, table1
+	mov [eax], ebx
+	;; ebx := ebx + 1
+	inc ebx
+	;; if(ebx != 512) goto start_loop
+	cmp ebx, 512
+	jl start_loop
 
 	mov eax, cr4
-	or eax, 0x20
+	or eax, (1 << 5)
 	mov cr4, eax
-
+	
 	mov eax, 0xC0000080
 	rdmsr
 	or eax, 0x00000100
 	wrmsr
 
+	mov eax, table4
+	mov cr3, eax
+	
+	mov eax, cr0
+	or eax, (1 << 31) | (1 << 0)
+	mov cr0, eax
+
+	mov ax, 0x10
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+
 	jmp 0x8:long_mode_entry
 	
 bits 64
-long_mode_entry:
-	;; Initialize Page Table
-	;; rbx = 0
-	mov rbx, 0
-start_loop:
-	;; *(table1 + rbx * 8) := rbx
-	mov rax, 8
-	mul rbx
-	mov rax, table1
-	add rbx, rax
-	mov [rax], rbx
-	;; rbx := rbx + 1
-	add rbx, 1
-	mov rbx, rax
-	;; if(rbx != 512) goto start_loop
-	cmp rbx, 512
-	jne start_loop
-
-	mov rax, table1
-	mov cr3, rax
-	
+long_mode_entry:	
 	;; Initialize Stack
 	mov rsp, stack_top
 	
